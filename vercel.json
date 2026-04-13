@@ -1,0 +1,14 @@
+{
+  "redirects": [
+    {
+      "source": "/:slug([a-z0-9-]{2,20})",
+      "destination": "https://sweetz.ai/create?via=:slug",
+      "statusCode": 302
+    },
+    {
+      "source": "/",
+      "destination": "https://sweetz.ai",
+      "statusCode": 302
+    }
+  ]
+}
