@@ -39,5 +39,8 @@
     { "source": "/create", "destination": "https://sweetz.ai/create", "permanent": false },
     { "source": "/login", "destination": "https://sweetz.ai/login", "permanent": false },
     { "source": "/signup", "destination": "https://sweetz.ai/signup", "permanent": false }
+  ],
+  "rewrites": [
+    { "source": "/:slug([a-zA-Z0-9_-]{1,40})", "destination": "/index.html" }
   ]
 }

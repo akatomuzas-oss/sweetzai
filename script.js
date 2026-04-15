@@ -102,6 +102,22 @@
     }
   }
 
+  // Path-based short link support. sweetzai.com/<slug> is rewritten by
+  // vercel.json to /index.html (browser URL stays /<slug>), and we read
+  // the slug off the pathname here so it flows through the same
+  // attribution pipeline as ?via=<slug>. An explicit ?via= in the query
+  // string always wins over the path slug.
+  function getPathSlug() {
+    try {
+      const path = window.location.pathname.replace(/^\/+|\/+$/g, "");
+      if (!path) return null;
+      if (/^[a-zA-Z0-9_-]{1,40}$/.test(path)) return path;
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   function getIncomingParams() {
     const q = new URLSearchParams(window.location.search);
     const o = {};
@@ -109,6 +125,10 @@
       const v = q.get(k);
       if (v) o[k] = v;
     });
+    if (!o.via) {
+      const slug = getPathSlug();
+      if (slug) o.via = slug;
+    }
     return o;
   }
 
@@ -281,6 +301,7 @@
     fireEvent("landing_view", {
       variation: variation,
       referrer: document.referrer || null,
+      path: window.location.pathname || "/",
       utm_source: acquisition.utm_source || null,
       utm_medium: acquisition.utm_medium || null,
       utm_campaign: acquisition.utm_campaign || null,
