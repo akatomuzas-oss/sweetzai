@@ -1,14 +1,43 @@
 {
-  "redirects": [
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "headers": [
     {
-      "source": "/:slug([a-z0-9-]{2,20})",
-      "destination": "https://sweetz.ai/lp?via=:slug",
-      "statusCode": 302
+      "source": "/media/(.*\\.webp)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
+        { "key": "Content-Type", "value": "image/webp" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    },
+    {
+      "source": "/videos/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    },
+    {
+      "source": "/(.*\\.(?:css|js))",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800" }
+      ]
     },
     {
       "source": "/",
-      "destination": "https://sweetz.ai/lp",
-      "statusCode": 302
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, s-maxage=300, stale-while-revalidate=3600" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+      ]
     }
+  ],
+  "redirects": [
+    { "source": "/create", "destination": "https://sweetz.ai/create", "permanent": false },
+    { "source": "/login", "destination": "https://sweetz.ai/login", "permanent": false },
+    { "source": "/signup", "destination": "https://sweetz.ai/signup", "permanent": false }
   ]
 }

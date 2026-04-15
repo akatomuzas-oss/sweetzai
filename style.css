@@ -1,0 +1,235 @@
+/* ------------------------------------------------------------------
+   sweetzai.com landing — matches sweetz.ai production theme exactly
+   Black bg + radial pink glow, pink accent (#ec4899 / #f472b6)
+   ------------------------------------------------------------------ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: #000;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(236, 72, 153, 0.3);
+}
+
+/* Radial pink glow — matches sweetz.ai production hero */
+body::before {
+  content: "";
+  position: fixed;
+  left: 50%;
+  top: -10%;
+  width: 900px;
+  height: 900px;
+  max-width: 120vw;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.18), transparent 60%);
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 0;
+  animation: pulse-bg 5s ease-in-out infinite;
+}
+
+@keyframes pulse-bg {
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ---------- Top bar ---------- */
+
+.topbar {
+  position: relative;
+  z-index: 2;
+  padding: 22px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  display: inline-flex;
+  align-items: baseline;
+  text-decoration: none;
+}
+
+.logo .brand {
+  color: #f472b6;
+}
+
+.logo .tld {
+  color: #fff;
+}
+
+.login {
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 8px 18px;
+  background: linear-gradient(135deg, #ec4899, #ec4899);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(236, 72, 153, 0.25);
+  transition: box-shadow 0.2s, transform 0.15s;
+}
+
+.login:hover {
+  box-shadow: 0 8px 32px rgba(236, 72, 153, 0.45);
+  transform: translateY(-1px);
+}
+
+/* ---------- Main ---------- */
+
+main {
+  position: relative;
+  z-index: 1;
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 44px 20px 60px;
+  text-align: center;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 44px;
+}
+
+.hero h1 {
+  font-size: clamp(32px, 5.5vw, 52px);
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  line-height: 1.05;
+  margin-bottom: 14px;
+}
+
+.hero h1 .pink {
+  background: linear-gradient(135deg, #f472b6, #e879f9, #f472b6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subhead {
+  color: #9ca3af;
+  font-size: clamp(14px, 1.8vw, 16px);
+  font-weight: 500;
+}
+
+/* ---------- Cards ---------- */
+
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+@media (max-width: 560px) {
+  .cards {
+    gap: 14px;
+    max-width: 380px;
+  }
+}
+
+.card {
+  position: relative;
+  display: block;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #0a0a0a;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.2s, box-shadow 0.25s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(236, 72, 153, 0.5);
+  box-shadow: 0 24px 64px rgba(236, 72, 153, 0.25),
+    0 0 0 1px rgba(236, 72, 153, 0.3);
+}
+
+.card:active {
+  transform: translateY(-3px) scale(0.98);
+}
+
+/* CSS crop: aspect-ratio + object-position:top clips the bottom of the
+   576×864 animated webp so genitals stay out of frame. No re-encoding. */
+.card-media {
+  width: 100%;
+  aspect-ratio: 576 / 740;
+  overflow: hidden;
+  background: #000;
+}
+
+.card-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: top;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card:hover .card-img {
+  transform: scale(1.04);
+}
+
+.card-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 50%;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.92) 100%);
+  pointer-events: none;
+}
+
+.card-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 22px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* ----- reduce-motion respect ----- */
+
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
+  }
+  .card,
+  .card-img {
+    transition: none;
+  }
+}
