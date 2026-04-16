@@ -109,6 +109,13 @@
       const v = q.get(k);
       if (v) o[k] = v;
     });
+    // Capture affiliate slug from path: sweetzai.com/luminox → via=luminox
+    if (!o.via) {
+      const pathSlug = window.location.pathname.replace(/^\//, "");
+      if (pathSlug && /^[a-z0-9_-]{2,30}$/i.test(pathSlug)) {
+        o.via = pathSlug;
+      }
+    }
     return o;
   }
 
