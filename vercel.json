@@ -38,7 +38,9 @@
   "redirects": [
     { "source": "/create", "destination": "https://sweetz.ai/create", "permanent": false },
     { "source": "/login", "destination": "https://sweetz.ai/login", "permanent": false },
-    { "source": "/signup", "destination": "https://sweetz.ai/signup", "permanent": false },
-    { "source": "/:slug([a-z0-9_-]{2,30})", "destination": "https://sweetz.ai/:slug", "statusCode": 302 }
+    { "source": "/signup", "destination": "https://sweetz.ai/signup", "permanent": false }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
