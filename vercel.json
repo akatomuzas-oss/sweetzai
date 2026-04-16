@@ -41,6 +41,6 @@
     { "source": "/signup", "destination": "https://sweetz.ai/signup", "permanent": false }
   ],
   "rewrites": [
-    { "source": "/:path((?!media|videos|style\\.css|script\\.js)[a-zA-Z0-9_-]+)", "destination": "/index.html" }
+    { "source": "/((?!media|videos).*)", "destination": "/" }
   ]
 }
