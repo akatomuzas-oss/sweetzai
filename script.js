@@ -1,47 +1,30 @@
 // ---------------------------------------------------------------------------
-// sweetzai.com landing script
+// sweetzai.com — redirect shell
 //
-// Responsibilities:
-//   1. ONE coinflip per page load — picks missionary OR blowjob GLOBALLY,
-//      then both cards (Realistic + Anime) show that same pose variation.
-//      Never mixed (looks incoherent). If a variation's media is missing
-//      (e.g. blowjob clips not generated yet) we fall back to missionary.
-//   2. Preserve all UTM / click-id params across the domain hop to sweetz.ai
-//      — plus the FirstPromoter cookie → forwarded as ?fpr= so sweetz.ai's
-//      middleware picks up the affiliate credit after the redirect.
-//   3. Rewrite card + login hrefs with the full param set BEFORE any click,
-//      so even middle-click / copy-link / right-click → open preserves
-//      attribution (not just the JS-intercepted left click).
-//   4. Fire fire-and-forget "landing_view" + "style_click" beacons to
-//      https://sweetz.ai/api/landing-event — uses sendBeacon with a
-//      text/plain Blob to avoid CORS preflight (the server parses JSON
-//      manually). Silent-fail so a broken endpoint never breaks the flow.
-//   5. Persist first-touch attribution in localStorage + first-party cookies
-//      so returning visitors still get credited to the original source.
+// 2026-05-11: the landing page (hero + 2 style cards) was retired in favor
+// of a direct redirect to sweetz.ai. This script keeps the attribution
+// surface intact so affiliate / UTM / FirstPromoter credit still flows
+// across the domain hop:
 //
-// Zero dependencies. Ships to Vercel as static files.
+//   1. Capture incoming params (utm_*, fbclid, gclid, fpr, via, ref…)
+//   2. Read the FirstPromoter _fprom_tid cookie if it landed on this domain
+//      (set by fpr.js after fpr.init/click in the <head>)
+//   3. Merge with localStorage first-touch attribution
+//   4. Append everything to https://sweetz.ai/ and window.location.replace
+//   5. Fire-and-forget "landing_view" beacon for measurement
+//
+// All of step 1-4 runs synchronously on DOMContentLoaded so the redirect
+// fires within ~10ms after parse. The <meta refresh> fallback covers the
+// (very rare) case where JS is disabled or throws.
+//
+// Zero dependencies. Ships to Vercel as a static file.
 // ---------------------------------------------------------------------------
 
 (function () {
   "use strict";
 
-  // ── Config ──────────────────────────────────────────────────────────────
-  // Where the media lives. Animated WebP files served by Vercel from
-  // marketing-assets/landing-site/public/media/.
-  const MEDIA_BASE = "/media";
-  const MEDIA_EXT = "webp";
-
-  // Which variations currently have media on disk. When blowjob clips are
-  // generated later, flip MEDIA_AVAILABLE.blowjob = true and drop the files
-  // into public/media/ — no other code change needed.
-  const MEDIA_AVAILABLE = {
-    missionary: true,
-    blowjob: false,
-  };
-
-  // Where the main app wizard lives. ?style= is read by src/app/(main)/create/page.tsx
-  const APP_CREATE_URL = "https://sweetz.ai/create";
-  const APP_LOGIN_URL = "https://sweetz.ai/login";
+  // Where the main app lives
+  const APP_HOME_URL = "https://sweetz.ai/";
 
   // Attribution params we always forward across the domain hop
   const FORWARD_PARAMS = [
@@ -60,19 +43,6 @@
     "ttclid",
     "msclkid",
   ];
-
-  // ── Helpers ────────────────────────────────────────────────────────────
-  function pickVariation() {
-    const available = Object.keys(MEDIA_AVAILABLE).filter(function (v) {
-      return MEDIA_AVAILABLE[v];
-    });
-    if (available.length === 0) return "missionary";
-    return available[Math.floor(Math.random() * available.length)];
-  }
-
-  function buildMediaSrc(style, variation) {
-    return MEDIA_BASE + "/" + style + "_" + variation + "." + MEDIA_EXT;
-  }
 
   function setCookie(name, value, days) {
     try {
@@ -157,9 +127,9 @@
     setCookie("sweetz_src", "sweetzai", 30);
   }
 
-  // ── Build forward URL for all sweetz.ai links ─────────────────────────
-  function buildForwardUrl(baseUrl, extra) {
-    const u = new URL(baseUrl);
+  // ── Build forward URL ──────────────────────────────────────────────────
+  function buildForwardUrl() {
+    const u = new URL(APP_HOME_URL);
     const merged = {};
 
     // 1. Stored first-touch attribution
@@ -179,12 +149,6 @@
     //    can pick up the affiliate credit
     const fpTid = getCookie("_fprom_tid");
     if (fpTid && !merged.fpr) merged.fpr = fpTid;
-    // 5. Caller-specific extras (e.g. style=realistic, variation=missionary)
-    if (extra) {
-      Object.keys(extra).forEach(function (k) {
-        merged[k] = extra[k];
-      });
-    }
 
     Object.keys(merged).forEach(function (k) {
       if (merged[k] != null && merged[k] !== "") {
@@ -201,15 +165,11 @@
         Object.assign({ event: name, ts: Date.now() }, payload)
       );
       if (navigator.sendBeacon) {
-        // text/plain Blob avoids CORS preflight (sendBeacon can't handle
-        // preflight, and application/json would force one). Server parses
-        // the body as JSON manually.
         navigator.sendBeacon(
           "https://sweetz.ai/api/landing-event",
           new Blob([body], { type: "text/plain" })
         );
       } else {
-        // Legacy fallback — keepalive fetch survives page unload
         fetch("https://sweetz.ai/api/landing-event", {
           method: "POST",
           headers: { "Content-Type": "text/plain" },
@@ -223,70 +183,13 @@
     }
   }
 
-  // ── Initialize cards ───────────────────────────────────────────────────
-  document.addEventListener("DOMContentLoaded", function () {
-    // Single coinflip for the entire page — both cards show the same pose.
-    const variation = pickVariation(); // "missionary" | "blowjob"
-
-    // Rewrite the login link with full attribution forwarding
-    const loginEl = document.getElementById("login-link");
-    if (loginEl) {
-      loginEl.setAttribute("href", buildForwardUrl(APP_LOGIN_URL, null));
-      loginEl.addEventListener("click", function () {
-        fireEvent("style_click", {
-          style: "login",
-          variation: variation,
-        });
-      });
-    }
-
-    const cards = document.querySelectorAll(".card");
-    cards.forEach(function (card) {
-      const style = card.dataset.style; // "realistic" | "anime"
-
-      // Swap media src to the picked variation (only if different from
-      // the default missionary that's already inlined in the HTML —
-      // this avoids a second network request for the default case)
-      const img = card.querySelector(".card-img");
-      if (img) {
-        const targetSrc = buildMediaSrc(style, variation);
-        if (img.getAttribute("src") !== targetSrc) {
-          img.setAttribute("src", targetSrc);
-        }
-      }
-
-      // Rewrite the href so middle-click / right-click / copy-link
-      // all preserve attribution, not just the left-click handler.
-      const forwardUrl = buildForwardUrl(APP_CREATE_URL, {
-        style: style,
-        variation: variation,
-      });
-      card.setAttribute("href", forwardUrl);
-
-      // Intercept left-click to fire beacon THEN navigate — sendBeacon
-      // survives the navigation so the event gets recorded.
-      card.addEventListener("click", function (e) {
-        // Only intercept plain left-click; let middle/cmd-click open in
-        // new tab naturally (href is already rewritten above)
-        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) {
-          fireEvent("style_click", {
-            style: style,
-            variation: variation,
-          });
-          return;
-        }
-        e.preventDefault();
-        fireEvent("style_click", {
-          style: style,
-          variation: variation,
-        });
-        window.location.href = forwardUrl;
-      });
-    });
-
-    // Single view event for attribution baseline
-    fireEvent("landing_view", {
-      variation: variation,
+  // ── Fire beacon + redirect ─────────────────────────────────────────────
+  // Run on DOMContentLoaded so the <meta refresh> fallback only fires if
+  // we somehow don't make it here. sendBeacon survives navigation so the
+  // event still arrives at sweetz.ai/api/landing-event after the hop.
+  function go() {
+    const forwardUrl = buildForwardUrl();
+    fireEvent("landing_redirect", {
       referrer: document.referrer || null,
       utm_source: acquisition.utm_source || null,
       utm_medium: acquisition.utm_medium || null,
@@ -294,6 +197,15 @@
       fbclid: acquisition.fbclid || null,
       gclid: acquisition.gclid || null,
       via: acquisition.via || null,
+      destination: forwardUrl,
     });
-  });
+    // replace() — no back-button entry for the bounce
+    window.location.replace(forwardUrl);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", go);
+  } else {
+    go();
+  }
 })();

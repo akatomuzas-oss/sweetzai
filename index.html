@@ -2,35 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-    <meta name="robots" content="index,follow" />
-    <link rel="canonical" href="https://sweetzai.com/" />
+    <!-- SEO: this is now a pure redirect shell. Tell crawlers the canonical
+         home is sweetz.ai and that they shouldn't index this page. -->
+    <meta name="robots" content="noindex,follow" />
+    <link rel="canonical" href="https://sweetz.ai/" />
 
-    <title>Sweetz — Create Your AI Girlfriend</title>
-    <meta name="description" content="Create your AI girlfriend — chat, voice calls, photos & videos on demand. 25 free tokens daily. No credit card to start." />
+    <title>Sweetz — Redirecting…</title>
+    <meta name="description" content="Redirecting to sweetz.ai…" />
 
-    <!-- Open Graph / social preview -->
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Sweetz — Create Your AI Girlfriend" />
-    <meta property="og:description" content="Chat, call, and generate photos of the perfect girl. Realistic or anime — pick your style to begin." />
-    <meta property="og:url" content="https://sweetzai.com/" />
-    <meta name="twitter:card" content="summary_large_image" />
+    <!-- Belt-and-suspenders: <meta refresh> fires after 1s if the JS
+         redirect below has any issue. Most users hit the JS path instantly. -->
+    <meta http-equiv="refresh" content="1;url=https://sweetz.ai/" />
 
-    <!-- Preconnect so the fireEvent() beacon to sweetz.ai resolves fast -->
+    <!-- Preconnect so the JS redirect resolves the next hop fast -->
     <link rel="preconnect" href="https://sweetz.ai" crossorigin />
+    <link rel="dns-prefetch" href="https://sweetz.ai" />
 
-    <!-- Preload hero webps for instant first paint on both cards. The script
-         swaps src based on the coinflip variation, but for the default
-         missionary case these match exactly so the preload hits. -->
-    <link rel="preload" as="image" href="/media/realistic_missionary.webp" type="image/webp" />
-    <link rel="preload" as="image" href="/media/anime_missionary.webp" type="image/webp" />
-
-    <!-- FirstPromoter affiliate tracking (same account as sweetz.ai)
-         Must be in <head> per FP docs. Sets _fprom_tid cookie on sweetzai.com
-         when a visitor arrives with ?fpr=CODE — script.js later forwards that
-         cookie value back to sweetz.ai as ?fpr= so the main app attributes
-         the signup correctly. -->
+    <!-- FirstPromoter affiliate tracking — kept so the ?fpr= cookie
+         capture still works on this domain before the JS redirect
+         forwards it to sweetz.ai as a query param. Same account as
+         the main app so the affiliate credit attaches correctly. -->
     <script>
       (function(w){w.fpr=w.fpr||function(){w.fpr.q=w.fpr.q||[];w.fpr.q[arguments[0]=='set'?'unshift':'push'](arguments);};})(window);
       fpr("init", { cid: "o3ki8oeh" });
@@ -38,57 +31,18 @@
     </script>
     <script src="https://cdn.firstpromoter.com/fpr.js" async></script>
 
-    <link rel="stylesheet" href="/style.css" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; background: #000; color: rgba(255,255,255,0.4); font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; height: 100%; }
+      body { display: flex; align-items: center; justify-content: center; }
+      .msg { text-align: center; padding: 1.5rem; }
+      .msg a { color: #ec4899; text-decoration: underline; }
+    </style>
   </head>
   <body>
-    <nav class="topbar">
-      <a class="logo" href="/" aria-label="Sweetz home">
-        <span class="brand">sweetz</span><span class="tld">.ai</span>
-      </a>
-      <a id="login-link" href="https://sweetz.ai/login" class="login">Log in</a>
-    </nav>
-
-    <main>
-      <header class="hero">
-        <h1>Create Your <span class="pink">AI Girlfriend</span></h1>
-        <p class="subhead">Pick a style to start — chat, call, and generate unlimited photos.</p>
-      </header>
-
-      <div class="cards" id="cards">
-        <a class="card" data-style="realistic" href="https://sweetz.ai/create?style=realistic" aria-label="Realistic">
-          <div class="card-media">
-            <img
-              class="card-img"
-              src="/media/realistic_missionary.webp"
-              alt="Realistic AI girlfriend"
-              width="576"
-              height="740"
-              decoding="async"
-              fetchpriority="high"
-            />
-          </div>
-          <div class="card-overlay"></div>
-          <div class="card-label">Realistic</div>
-        </a>
-
-        <a class="card" data-style="anime" href="https://sweetz.ai/create?style=anime" aria-label="Anime">
-          <div class="card-media">
-            <img
-              class="card-img"
-              src="/media/anime_missionary.webp"
-              alt="Anime AI girlfriend"
-              width="576"
-              height="740"
-              decoding="async"
-              fetchpriority="high"
-            />
-          </div>
-          <div class="card-overlay"></div>
-          <div class="card-label">Anime</div>
-        </a>
-      </div>
+    <main class="msg">
+      <p>Redirecting to <a href="https://sweetz.ai/">sweetz.ai</a>…</p>
     </main>
-
     <script src="/script.js"></script>
   </body>
 </html>
